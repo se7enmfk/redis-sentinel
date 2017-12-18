@@ -143,15 +143,17 @@ docker exec rediscluster_sentinel_1 redis-cli -p 26379 SENTINEL get-master-addr-
 ```
 
 ## References
+[https://github.com/mustafaileri/redis-cluster-with-sentinel.git][1]
 
-[https://github.com/mdevilliers/docker-rediscluster][1]
+[https://github.com/mdevilliers/docker-rediscluster][2]
 
-[https://registry.hub.docker.com/u/joshula/redis-sentinel/] [2]
+[https://registry.hub.docker.com/u/joshula/redis-sentinel/] [3]
 
-[1]: https://github.com/mdevilliers/docker-rediscluster
-[2]: https://registry.hub.docker.com/u/joshula/redis-sentinel/
-[3]: https://docs.docker.com/compose/
-[4]: https://www.docker.com
+[1]: https://github.com/mustafaileri/redis-cluster-with-sentinel.git
+[2]: https://github.com/mdevilliers/docker-rediscluster
+[3]: https://registry.hub.docker.com/u/joshula/redis-sentinel/
+[4]: https://docs.docker.com/compose/
+[5]: https://www.docker.com
 
 ## License
 
@@ -161,4 +163,5 @@ Apache 2.0 license
 
 * Li Yi (<denverdino@gmail.com>)
 * Ty Alexander (<ty.alexander@gmail.com>)
+* se7en zhou (<se7enmine@gmail.com>)
 
