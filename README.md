@@ -1,47 +1,11 @@
-# redis-sentinel 
+# redis-cluster-with-sentinel
 **Redis cluster with Docker Compose** 
-
-Using Docker Compose to setup a redis cluster with sentinel.
-
-This project is inspired by the project of [https://github.com/mdevilliers/docker-rediscluster][1]
-
-## Prerequisite
-
-Install [Docker][4] and [Docker Compose][3] in testing environment
-
-If you are using Windows, please execute the following command before "git clone" to disable changing the line endings of script files into DOS format
-
-```
-git config --global core.autocrlf false
-```
-
-## Docker Compose template of Redis cluster
-
-The template defines the topology of the Redis cluster
-
-```
-master:
-  image: redis:4.0.6-alpine
-slave:
-  image: redis:4.0.6-alpine
-  command: redis-server --slaveof redis-master 6379
-  links:
-    - master:redis-master
-sentinel:
-  build: sentinel
-  environment:
-    - SENTINEL_DOWN_AFTER=5000
-    - SENTINEL_FAILOVER=5000    
-  links:
-    - master:redis-master
-    - slave
-```
 
 There are following services in the cluster,
 
-* master: Redis master
-* slave:  Redis slave
-* sentinel: Redis sentinel
+* master: Master Redis Server
+* slave:  Slave Redis Server
+* sentinel: Sentinel Server
 
 
 The sentinels are configured with a "mymaster" instance with the following properties -
@@ -58,39 +22,28 @@ The details could be found in sentinel/sentinel.conf
 The default values of the environment variables for Sentinel are as following
 
 * SENTINEL_QUORUM: 2
-* SENTINEL_DOWN_AFTER: 30000
-* SENTINEL_FAILOVER: 180000
+* SENTINEL_DOWN_AFTER: 5000
+* SENTINEL_FAILOVER: 5000
 
 
 
-## Play with it
+## Try it
 
-Build the sentinel Docker image
-
+Build and start services
 ```
-docker-compose build
+docker-compose up --build
 ```
-
-Start the redis cluster
-
-```
-docker-compose up -d
-```
-
 Check the status of redis cluster
-
 ```
 docker-compose ps
 ```
-
 The result is 
-
 ```
-         Name                        Command               State          Ports        
---------------------------------------------------------------------------------------
-rediscluster_master_1     docker-entrypoint.sh redis ...   Up      6379/tcp            
-rediscluster_sentinel_1   docker-entrypoint.sh redis ...   Up      26379/tcp, 6379/tcp 
-rediscluster_slave_1      docker-entrypoint.sh redis ...   Up      6379/tcp     
+               Name                              Command               State    Ports   
+---------------------------------------------------------------------------------------
+redisclusterwithsentinel_master_1     docker-entrypoint.sh redis ...   Up      6379/tcp 
+redisclusterwithsentinel_sentinel_1   entrypoint.sh                    Up      6379/tcp 
+redisclusterwithsentinel_slave_1      docker-entrypoint.sh redis ...   Up      6379/tcp 
 ```
 
 Scale out the instance number of sentinel
@@ -102,7 +55,7 @@ docker-compose scale sentinel=3
 Scale out the instance number of slaves
 
 ```
-docker-compose scale slave=2
+docker-compose scale slave=4
 ```
 
 Check the status of redis cluster
@@ -114,54 +67,41 @@ docker-compose ps
 The result is 
 
 ```
-         Name                        Command               State          Ports        
---------------------------------------------------------------------------------------
-rediscluster_master_1     docker-entrypoint.sh redis ...   Up      6379/tcp            
-rediscluster_sentinel_1   docker-entrypoint.sh redis ...   Up      26379/tcp, 6379/tcp 
-rediscluster_sentinel_2   docker-entrypoint.sh redis ...   Up      26379/tcp, 6379/tcp 
-rediscluster_sentinel_3   docker-entrypoint.sh redis ...   Up      26379/tcp, 6379/tcp 
-rediscluster_slave_1      docker-entrypoint.sh redis ...   Up      6379/tcp            
-rediscluster_slave_2      docker-entrypoint.sh redis ...   Up      6379/tcp            
+               Name                              Command               State    Ports   
+---------------------------------------------------------------------------------------
+redisclusterwithsentinel_master_1     docker-entrypoint.sh redis ...   Up      6379/tcp 
+redisclusterwithsentinel_sentinel_1   entrypoint.sh                    Up      6379/tcp 
+redisclusterwithsentinel_sentinel_2   entrypoint.sh                    Up      6379/tcp 
+redisclusterwithsentinel_sentinel_3   entrypoint.sh                    Up      6379/tcp 
+redisclusterwithsentinel_slave_1      docker-entrypoint.sh redis ...   Up      6379/tcp 
+redisclusterwithsentinel_slave_2      docker-entrypoint.sh redis ...   Up      6379/tcp 
+redisclusterwithsentinel_slave_3      docker-entrypoint.sh redis ...   Up      6379/tcp 
+redisclusterwithsentinel_slave_4      docker-entrypoint.sh redis ...   Up      6379/tcp 
 ```
 
-Execute the test scripts
+For stop master redis server.
 ```
-./test.sh
-```
-to simulate stop and recover the Redis master. And you will see the master is switched to slave automatically. 
-
-Or, you can do the test manually to pause/unpause redis server through
-
-```
-docker pause rediscluster_master_1
-docker unpause rediscluster_master_1
+ docker-compose unpause master
 ```
 And get the sentinel infomation with following commands
 
 ```
-docker exec rediscluster_sentinel_1 redis-cli -p 26379 SENTINEL get-master-addr-by-name mymaster
+docker-compose exec sentinel redis-cli -p 26379 SENTINEL get-master-addr-by-name mymaster
 ```
 
 ## References
-[https://github.com/mustafaileri/redis-cluster-with-sentinel.git][1]
 
-[https://github.com/mdevilliers/docker-rediscluster][2]
+[https://github.com/AliyunContainerService/redis-cluster][1]
 
-[https://registry.hub.docker.com/u/joshula/redis-sentinel/] [3]
+[https://registry.hub.docker.com/u/joshula/redis-sentinel/] [2]
 
-[1]: https://github.com/mustafaileri/redis-cluster-with-sentinel.git
-[2]: https://github.com/mdevilliers/docker-rediscluster
-[3]: https://registry.hub.docker.com/u/joshula/redis-sentinel/
-[4]: https://docs.docker.com/compose/
-[5]: https://www.docker.com
+[https://docs.docker.com/compose/] [3]
 
-## License
-
-Apache 2.0 license 
+[1]: https://github.com/AliyunContainerService/redis-cluster
+[2]: https://registry.hub.docker.com/u/joshula/redis-sentinel/
+[3]: https://docs.docker.com/compose/
 
 ## Contributors
 
-* Li Yi (<denverdino@gmail.com>)
-* Ty Alexander (<ty.alexander@gmail.com>)
-* se7en zhou (<se7enmine@gmail.com>)
+* Mustafa Ileri (<mi@mustafaileri.com>)
 
