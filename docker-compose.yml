@@ -1,15 +1,36 @@
 master:
   image: redis:4.0.6-alpine
-slave:
+slave_1:
   image: redis:4.0.6-alpine
   command: redis-server --slaveof redis-master 6379
   links:
     - master:redis-master
-sentinel:
+  ports:
+    - "16379:6379"
+slave_2:
+  image: redis:4.0.6-alpine
+  command: redis-server --slaveof redis-master 6379
+  links:
+    - master:redis-master
+  ports:
+    - "26379:6379"
+sentinel_1:
   build: sentinel
   environment:
     - SENTINEL_DOWN_AFTER=5000
     - SENTINEL_FAILOVER=5000
+  ports:
+    - "63791:6379"
   links:
     - master:redis-master
-    - slave
+    - slave_1
+sentinel_2:
+  build: sentinel
+  environment:
+    - SENTINEL_DOWN_AFTER=5000
+    - SENTINEL_FAILOVER=5000
+  ports:
+    - "63792:6379"
+  links:
+    - master:redis-master
+    - slave_2
